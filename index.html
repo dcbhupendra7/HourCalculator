@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Employee Hours Calculator</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- Include jsPDF and AutoTable from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Employee Hours Calculator</h1>
+
+      <!-- Time Entry Form -->
+      <form id="timeEntryForm" class="card">
+        <h2>Enter Time Record</h2>
+        <div class="form-group">
+          <label for="employeeName">Employee Name:</label>
+          <input
+            type="text"
+            id="employeeName"
+            placeholder="e.g., John Doe"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="checkInDate">Check-In Date:</label>
+          <input type="date" id="checkInDate" required />
+        </div>
+
+        <div class="form-group-inline">
+          <label>Check-In Time:</label>
+          <select id="checkInHour" required>
+            <option value="" disabled selected>HH</option>
+          </select>
+          <select id="checkInMinute" required>
+            <option value="" disabled selected>MM</option>
+          </select>
+          <select id="checkInMeridiem">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="checkOutDate">Check-Out Date:</label>
+          <input type="date" id="checkOutDate" required />
+        </div>
+
+        <div class="form-group-inline">
+          <label>Check-Out Time:</label>
+          <select id="checkOutHour" required>
+            <option value="" disabled selected>HH</option>
+          </select>
+          <select id="checkOutMinute" required>
+            <option value="" disabled selected>MM</option>
+          </select>
+          <select id="checkOutMeridiem">
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn">Add Record</button>
+        <div id="formError" class="error"></div>
+      </form>
+
+      <!-- Records Table -->
+      <div class="card">
+        <h2>Records</h2>
+        <table id="recordsTable">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Check-In</th>
+              <th>Check-Out</th>
+              <th>Hours Worked</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows inserted dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Summaries -->
+      <div class="card summary-card">
+        <h2>Weekly Summary</h2>
+        <div id="weeklySummary"></div>
+      </div>
+
+      <div class="card summary-card">
+        <h2>Biweekly Summary</h2>
+        <div id="biweeklySummary"></div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="btn-group">
+        <button id="exportBtn" class="btn">Export to PDF</button>
+        <button id="resetBtn" class="btn btn-danger">Reset Data</button>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
