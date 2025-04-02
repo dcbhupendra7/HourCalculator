@@ -2,6 +2,8 @@
 let records = [];
 
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("DOM fully loaded, populating dropdowns...");
+
   // Populate hour dropdowns (1-12)
   populateDropdown("checkInHour", 1, 12);
   populateDropdown("checkOutHour", 1, 12);
@@ -25,9 +27,14 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("resetBtn").addEventListener("click", resetData);
 });
 
-// Populate dropdown with numbers; if pad is true, pad with zero (e.g., "0" becomes "00")
+// Populate dropdown with numbers; if pad is true, pad with zero
 function populateDropdown(id, start, end, pad = false) {
+  console.log(`Populating dropdown for ID: ${id}, from ${start} to ${end}`);
   const select = document.getElementById(id);
+  if (!select) {
+    console.error(`Element with ID ${id} not found!`);
+    return;
+  }
   for (let i = start; i <= end; i++) {
     let value = i.toString();
     if (pad && value.length < 2) value = "0" + value;
@@ -36,6 +43,7 @@ function populateDropdown(id, start, end, pad = false) {
     option.textContent = value;
     select.appendChild(option);
   }
+  console.log(`Dropdown ${id} populated successfully.`);
 }
 
 // Parse date and time values into a Date object
@@ -79,6 +87,7 @@ function addRecord() {
     !checkOutHour ||
     !checkOutMinute
   ) {
+    errorDiv.style.color = "#dc3545";
     errorDiv.textContent = "Please fill in all required fields.";
     return;
   }
@@ -97,11 +106,13 @@ function addRecord() {
   );
 
   if (!checkInTime || !checkOutTime) {
+    errorDiv.style.color = "#dc3545";
     errorDiv.textContent = "Error parsing time. Please check your entries.";
     return;
   }
 
   if (checkOutTime <= checkInTime) {
+    errorDiv.style.color = "#dc3545";
     errorDiv.textContent = "Check-out time must be after check-in time.";
     return;
   }
@@ -125,11 +136,15 @@ function addRecord() {
   updateRecordsTable();
   updateTotalSummary();
 
-  // Reset form using reset() method
+  // Success feedback
+  errorDiv.style.color = "#28a745";
+  errorDiv.textContent = "Record added successfully!";
+  setTimeout(() => (errorDiv.textContent = ""), 2000);
+
   document.getElementById("timeEntryForm").reset();
 }
 
-// Update the records table (unchanged)
+// Update the records table
 function updateRecordsTable() {
   const tbody = document.querySelector("#recordsTable tbody");
   tbody.innerHTML = "";
@@ -154,7 +169,7 @@ function deleteRecord(index) {
   updateTotalSummary();
 }
 
-// Update total hours summary per employee (aggregated from all records)
+// Update total hours summary per employee as a table
 function updateTotalSummary() {
   const totalData = {};
   records.forEach((rec) => {
@@ -164,69 +179,80 @@ function updateTotalSummary() {
     totalData[rec.employeeName] += rec.minutesWorked;
   });
 
-  let html = "<ul>";
+  const tbody = document.querySelector("#totalSummaryTable tbody");
+  tbody.innerHTML = ""; // Clear existing rows
+
   for (const emp in totalData) {
-    html += `<li>${emp}: ${formatDuration(totalData[emp])}</li>`;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${emp}</td>
+      <td>${formatDuration(totalData[emp])}</td>
+    `;
+    tbody.appendChild(tr);
   }
-  html += "</ul>";
-  document.getElementById("totalSummary").innerHTML = html;
 }
 
-// Export report as PDF with two tables:
-// 1. Daily Report table listing Employee, Check-In (date & time), Check-Out (date & time), Daily Hours.
-// 2. Total Hours Summary table with Employee and Total Hours.
+// Export report as PDF
 function exportToPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  const exportBtn = document.getElementById("exportBtn");
+  exportBtn.textContent = "Exporting...";
+  exportBtn.disabled = true;
 
-  // Title
-  doc.setFontSize(18);
-  doc.text("Employee Hours Report", 14, 20);
-  doc.setFontSize(12);
+  setTimeout(() => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-  // Daily Report Table: one row per record
-  const dailyRows = records.map((rec) => [
-    rec.employeeName,
-    `${rec.checkInDate} ${rec.checkInTime}`,
-    `${rec.checkOutDate} ${rec.checkOutTime}`,
-    rec.formattedDuration,
-  ]);
-  doc.text("Daily Report", 14, 30);
-  doc.autoTable({
-    head: [["Employee", "Check-In", "Check-Out", "Daily Hours"]],
-    body: dailyRows,
-    startY: 35,
-    theme: "striped",
-    headStyles: { fillColor: [0, 123, 255] },
-  });
+    // Title
+    doc.setFontSize(18);
+    doc.text("Employee Hours Report", 14, 20);
+    doc.setFontSize(12);
 
-  // Total Hours Summary: Sum all minutes per employee
-  const totalData = {};
-  records.forEach((rec) => {
-    if (!totalData[rec.employeeName]) totalData[rec.employeeName] = 0;
-    totalData[rec.employeeName] += rec.minutesWorked;
-  });
-  const summaryRows = [];
-  for (const emp in totalData) {
-    summaryRows.push([emp, formatDuration(totalData[emp])]);
-  }
+    // Daily Report Table
+    const dailyRows = records.map((rec) => [
+      rec.employeeName,
+      `${rec.checkInDate} ${rec.checkInTime}`,
+      `${rec.checkOutDate} ${rec.checkOutTime}`,
+      rec.formattedDuration,
+    ]);
+    doc.text("Daily Report", 14, 30);
+    doc.autoTable({
+      head: [["Employee", "Check-In", "Check-Out", "Daily Hours"]],
+      body: dailyRows,
+      startY: 35,
+      theme: "striped",
+      headStyles: { fillColor: [0, 123, 255] },
+    });
 
-  let yPos = doc.lastAutoTable.finalY + 10;
-  doc.setFontSize(16);
-  doc.text("Total Hours per Employee", 14, yPos);
-  yPos += 6;
-  doc.autoTable({
-    head: [["Employee", "Total Hours"]],
-    body: summaryRows,
-    startY: yPos,
-    theme: "striped",
-    headStyles: { fillColor: [0, 123, 255] },
-  });
+    // Total Hours Summary
+    const totalData = {};
+    records.forEach((rec) => {
+      if (!totalData[rec.employeeName]) totalData[rec.employeeName] = 0;
+      totalData[rec.employeeName] += rec.minutesWorked;
+    });
+    const summaryRows = [];
+    for (const emp in totalData) {
+      summaryRows.push([emp, formatDuration(totalData[emp])]);
+    }
 
-  doc.save("employee_hours.pdf");
+    let yPos = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(16);
+    doc.text("Total Hours per Employee", 14, yPos);
+    yPos += 6;
+    doc.autoTable({
+      head: [["Employee", "Total Hours"]],
+      body: summaryRows,
+      startY: yPos,
+      theme: "striped",
+      headStyles: { fillColor: [0, 123, 255] },
+    });
+
+    doc.save("employee_hours.pdf");
+    exportBtn.textContent = "Export to PDF";
+    exportBtn.disabled = false;
+  }, 500); // Simulate processing time
 }
 
-// Reset all data, clear table, summary, and form
+// Reset all data
 function resetData() {
   if (
     confirm(
@@ -235,7 +261,7 @@ function resetData() {
   ) {
     records = [];
     updateRecordsTable();
-    document.getElementById("totalSummary").innerHTML = "";
+    updateTotalSummary();
     document.getElementById("timeEntryForm").reset();
   }
 }

@@ -7,14 +7,19 @@
     <!-- Include jsPDF and AutoTable from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <!-- Google Fonts for Roboto -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div class="container">
       <h1>Employee Hours Calculator</h1>
 
       <!-- Time Entry Form -->
-      <form id="timeEntryForm" class="card">
-        <h2>Enter Time Record</h2>
+      <form id="timeEntryForm" class="card" aria-labelledby="formTitle">
+        <h2 id="formTitle">Enter Time Record</h2>
         <div class="form-group">
           <label for="employeeName">Employee Name:</label>
           <input
@@ -22,45 +27,55 @@
             id="employeeName"
             placeholder="e.g., John Doe"
             required
+            aria-required="true"
           />
         </div>
 
-        <div class="form-group">
-          <label for="checkInDate">Check-In Date:</label>
-          <input type="date" id="checkInDate" required />
+        <!-- Check-In Date and Time on the same line -->
+        <div class="form-group-row">
+          <div class="form-group date-group">
+            <label for="checkInDate">Check-In Date:</label>
+            <input type="date" id="checkInDate" required aria-required="true" />
+          </div>
+          <div class="form-group-inline time-group">
+            <label>Check-In Time:</label>
+            <select id="checkInHour" required aria-required="true">
+              <option value="" disabled selected>HH</option>
+            </select>
+            <select id="checkInMinute" required aria-required="true">
+              <option value="" disabled selected>MM</option>
+            </select>
+            <select id="checkInMeridiem" aria-label="AM/PM">
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
         </div>
 
-        <div class="form-group-inline">
-          <label>Check-In Time:</label>
-          <select id="checkInHour" required>
-            <option value="" disabled selected>HH</option>
-          </select>
-          <select id="checkInMinute" required>
-            <option value="" disabled selected>MM</option>
-          </select>
-          <select id="checkInMeridiem">
-            <option value="AM">AM</option>
-            <option value="PM">PM</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="checkOutDate">Check-Out Date:</label>
-          <input type="date" id="checkOutDate" required />
-        </div>
-
-        <div class="form-group-inline">
-          <label>Check-Out Time:</label>
-          <select id="checkOutHour" required>
-            <option value="" disabled selected>HH</option>
-          </select>
-          <select id="checkOutMinute" required>
-            <option value="" disabled selected>MM</option>
-          </select>
-          <select id="checkOutMeridiem">
-            <option value="AM">AM</option>
-            <option value="PM">PM</option>
-          </select>
+        <!-- Check-Out Date and Time on the same line -->
+        <div class="form-group-row">
+          <div class="form-group date-group">
+            <label for="checkOutDate">Check-Out Date:</label>
+            <input
+              type="date"
+              id="checkOutDate"
+              required
+              aria-required="true"
+            />
+          </div>
+          <div class="form-group-inline time-group">
+            <label>Check-Out Time:</label>
+            <select id="checkOutHour" required aria-required="true">
+              <option value="" disabled selected>HH</option>
+            </select>
+            <select id="checkOutMinute" required aria-required="true">
+              <option value="" disabled selected>MM</option>
+            </select>
+            <select id="checkOutMeridiem" aria-label="AM/PM">
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
         </div>
 
         <button type="submit" class="btn">Add Record</button>
@@ -89,7 +104,17 @@
       <!-- Total Hours Summary -->
       <div class="card summary-card">
         <h2>Total Hours Summary</h2>
-        <div id="totalSummary"></div>
+        <table id="totalSummaryTable">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Total Hours</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows inserted dynamically -->
+          </tbody>
+        </table>
       </div>
 
       <!-- Action Buttons -->
