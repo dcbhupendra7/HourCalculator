@@ -234,7 +234,7 @@ table tr:hover {
 .modal-content {
   color: #000;
   background-color: #ffffff;
-  margin: 15% auto; /* Center it vertically and horizontally */
+  margin: 15% auto;
   padding: 20px;
   border: 1px solid #888;
   width: 80%;
