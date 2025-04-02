@@ -124,10 +124,12 @@ function addRecord() {
   records.push(record);
   updateRecordsTable();
   updateTotalSummary();
+
+  // Reset form using reset() method
   document.getElementById("timeEntryForm").reset();
 }
 
-// Update the records table (kept as is)
+// Update the records table (unchanged)
 function updateRecordsTable() {
   const tbody = document.querySelector("#recordsTable tbody");
   tbody.innerHTML = "";
@@ -171,8 +173,8 @@ function updateTotalSummary() {
 }
 
 // Export report as PDF with two tables:
-// 1. A Daily Report table listing Employee, Check-In (date & time), Check-Out (date & time), Daily Hours.
-// 2. A Total Hours Summary table listing Employee and Total Hours.
+// 1. Daily Report table listing Employee, Check-In (date & time), Check-Out (date & time), Daily Hours.
+// 2. Total Hours Summary table with Employee and Total Hours.
 function exportToPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
