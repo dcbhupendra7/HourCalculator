@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("resetBtn").addEventListener("click", resetData);
 });
 
-// Populate dropdown with numbers; if pad is true, pad the number (e.g., "0" becomes "00")
+// Populate dropdown with numbers; if pad is true, pad with zero (e.g., "0" becomes "00")
 function populateDropdown(id, start, end, pad = false) {
   const select = document.getElementById(id);
   for (let i = start; i <= end; i++) {
@@ -123,12 +123,11 @@ function addRecord() {
 
   records.push(record);
   updateRecordsTable();
-  updateWeeklySummary();
-  updateBiweeklySummary();
+  updateTotalSummary();
   document.getElementById("timeEntryForm").reset();
 }
 
-// Update the records table with a Delete button for each record
+// Update the records table (kept as is)
 function updateRecordsTable() {
   const tbody = document.querySelector("#recordsTable tbody");
   tbody.innerHTML = "";
@@ -150,80 +149,30 @@ function updateRecordsTable() {
 function deleteRecord(index) {
   records.splice(index, 1);
   updateRecordsTable();
-  updateWeeklySummary();
-  updateBiweeklySummary();
+  updateTotalSummary();
 }
 
-// Helper: Get the Monday of the week for a given date string (for grouping)
-function getMonday(dateStr) {
-  const d = new Date(dateStr);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const monday = new Date(d.setDate(diff));
-  return monday.toISOString().split("T")[0];
-}
-
-// Update weekly summary per employee (grouped by the Monday of each week)
-function updateWeeklySummary() {
-  const weeklyData = {};
+// Update total hours summary per employee (aggregated from all records)
+function updateTotalSummary() {
+  const totalData = {};
   records.forEach((rec) => {
-    const weekStart = getMonday(rec.checkInDate);
-    if (!weeklyData[rec.employeeName]) {
-      weeklyData[rec.employeeName] = {};
+    if (!totalData[rec.employeeName]) {
+      totalData[rec.employeeName] = 0;
     }
-    if (!weeklyData[rec.employeeName][weekStart]) {
-      weeklyData[rec.employeeName][weekStart] = 0;
-    }
-    weeklyData[rec.employeeName][weekStart] += rec.minutesWorked;
+    totalData[rec.employeeName] += rec.minutesWorked;
   });
 
-  let html = "";
-  for (const emp in weeklyData) {
-    html += `<strong>${emp}</strong><ul>`;
-    for (const week in weeklyData[emp]) {
-      html += `<li>Week of ${week}: ${formatDuration(
-        weeklyData[emp][week]
-      )}</li>`;
-    }
-    html += `</ul>`;
+  let html = "<ul>";
+  for (const emp in totalData) {
+    html += `<li>${emp}: ${formatDuration(totalData[emp])}</li>`;
   }
-  document.getElementById("weeklySummary").innerHTML = html;
-}
-
-// Update biweekly summary per employee (grouping consecutive weeks)
-function updateBiweeklySummary() {
-  const weeklyData = {};
-  records.forEach((rec) => {
-    const weekStart = getMonday(rec.checkInDate);
-    if (!weeklyData[rec.employeeName]) {
-      weeklyData[rec.employeeName] = {};
-    }
-    if (!weeklyData[rec.employeeName][weekStart]) {
-      weeklyData[rec.employeeName][weekStart] = 0;
-    }
-    weeklyData[rec.employeeName][weekStart] += rec.minutesWorked;
-  });
-
-  let html = "";
-  for (const emp in weeklyData) {
-    html += `<strong>${emp}</strong><ul>`;
-    const weeks = Object.keys(weeklyData[emp]).sort();
-    for (let i = 0; i < weeks.length; i += 2) {
-      const week1 = weeks[i];
-      const week2 = weeks[i + 1];
-      const total =
-        weeklyData[emp][week1] + (week2 ? weeklyData[emp][week2] : 0);
-      const period = week2 ? `${week1} & ${week2}` : week1;
-      html += `<li>Biweekly (${period}): ${formatDuration(total)}</li>`;
-    }
-    html += `</ul>`;
-  }
-  document.getElementById("biweeklySummary").innerHTML = html;
+  html += "</ul>";
+  document.getElementById("totalSummary").innerHTML = html;
 }
 
 // Export report as PDF with two tables:
 // 1. A Daily Report table listing Employee, Check-In (date & time), Check-Out (date & time), Daily Hours.
-// 2. A Total Hours Summary table showing Employee and Total Hours (aggregated from all records).
+// 2. A Total Hours Summary table listing Employee and Total Hours.
 function exportToPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -249,15 +198,15 @@ function exportToPDF() {
     headStyles: { fillColor: [0, 123, 255] },
   });
 
-  // Total Hours Summary: Sum all minutes per employee across all records
-  const totalHours = {};
+  // Total Hours Summary: Sum all minutes per employee
+  const totalData = {};
   records.forEach((rec) => {
-    if (!totalHours[rec.employeeName]) totalHours[rec.employeeName] = 0;
-    totalHours[rec.employeeName] += rec.minutesWorked;
+    if (!totalData[rec.employeeName]) totalData[rec.employeeName] = 0;
+    totalData[rec.employeeName] += rec.minutesWorked;
   });
   const summaryRows = [];
-  for (const emp in totalHours) {
-    summaryRows.push([emp, formatDuration(totalHours[emp])]);
+  for (const emp in totalData) {
+    summaryRows.push([emp, formatDuration(totalData[emp])]);
   }
 
   let yPos = doc.lastAutoTable.finalY + 10;
@@ -275,7 +224,7 @@ function exportToPDF() {
   doc.save("employee_hours.pdf");
 }
 
-// Reset all data, clear table, summaries, and form
+// Reset all data, clear table, summary, and form
 function resetData() {
   if (
     confirm(
@@ -284,8 +233,7 @@ function resetData() {
   ) {
     records = [];
     updateRecordsTable();
-    document.getElementById("weeklySummary").innerHTML = "";
-    document.getElementById("biweeklySummary").innerHTML = "";
+    document.getElementById("totalSummary").innerHTML = "";
     document.getElementById("timeEntryForm").reset();
   }
 }
