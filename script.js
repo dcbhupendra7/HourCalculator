@@ -252,16 +252,37 @@ function exportToPDF() {
   }, 500); // Simulate processing time
 }
 
-// Reset all data
+// // Reset all data
+// function resetData() {
+//   if (
+//     confirm(
+//       "Are you sure you want to reset all data? This action cannot be undone."
+//     )
+//   ) {
+//     records = [];
+//     updateRecordsTable();
+//     updateTotalSummary();
+//     document.getElementById("timeEntryForm").reset();
+//   }
+// }
+
+// New resetData function that shows the custom modal
 function resetData() {
-  if (
-    confirm(
-      "Are you sure you want to reset all data? This action cannot be undone."
-    )
-  ) {
-    records = [];
-    updateRecordsTable();
-    updateTotalSummary();
-    document.getElementById("timeEntryForm").reset();
-  }
+  document.getElementById("confirmModal").style.display = "block";
 }
+
+// Event listeners for modal buttons
+document.getElementById("confirmYes").addEventListener("click", function () {
+  // User confirmed reset; clear data
+  records = [];
+  updateRecordsTable();
+  updateTotalSummary();
+  document.getElementById("timeEntryForm").reset();
+  // Hide the modal
+  document.getElementById("confirmModal").style.display = "none";
+});
+
+document.getElementById("confirmNo").addEventListener("click", function () {
+  // User canceled; just hide the modal
+  document.getElementById("confirmModal").style.display = "none";
+});
