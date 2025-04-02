@@ -218,8 +218,8 @@ table tr:hover {
 }
 
 /* Modal container */
-.modal {
-  display: none; /* Hidden by default */
+.confirm-modal {
+  display: none !important; /* Hidden by default */
   position: fixed;
   z-index: 1000;
   left: 0;
