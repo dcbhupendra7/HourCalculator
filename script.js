@@ -192,38 +192,52 @@ function updateTotalSummary() {
   }
 }
 
-// Export report as PDF
 function exportToPDF() {
-  const exportBtn = document.getElementById("exportBtn");
-  exportBtn.textContent = "Exporting...";
-  exportBtn.disabled = true;
+  // Create a new Image object
+  const img = new Image();
+  img.src = "logo.png"; // Ensure logo.png is in the same directory
 
-  setTimeout(() => {
+  img.onload = function () {
+    // Create a canvas to draw the image and get the Base64 data URL
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    const logoData = canvas.toDataURL("image/png");
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // Title
-    doc.setFontSize(18);
-    doc.text("Employee Hours Report", 14, 20);
+    // Add Company Logo
+    // Adjust x, y, width, and height as needed
+    doc.addImage(logoData, "PNG", 14, 10, 20, 20);
+    // Add Company Name next to the logo
+    doc.setFontSize(20);
+    doc.text("Motel 6,Odessa, TX 79766", 50, 20);
+
+    // Report Title
+    doc.setFontSize(15);
+    doc.text("(432) 272-8702", 50, 28);
     doc.setFontSize(12);
 
-    // Daily Report Table
+    // Daily Report Table: one row per record
     const dailyRows = records.map((rec) => [
       rec.employeeName,
       `${rec.checkInDate} ${rec.checkInTime}`,
       `${rec.checkOutDate} ${rec.checkOutTime}`,
       rec.formattedDuration,
     ]);
-    doc.text("Daily Report", 14, 30);
+    doc.text("Daily Hours", 14, 50);
     doc.autoTable({
       head: [["Employee", "Check-In", "Check-Out", "Daily Hours"]],
       body: dailyRows,
-      startY: 35,
+      startY: 55,
       theme: "striped",
       headStyles: { fillColor: [0, 123, 255] },
     });
 
-    // Total Hours Summary
+    // Total Hours Summary: Sum all minutes per employee
     const totalData = {};
     records.forEach((rec) => {
       if (!totalData[rec.employeeName]) totalData[rec.employeeName] = 0;
@@ -236,7 +250,7 @@ function exportToPDF() {
 
     let yPos = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(16);
-    doc.text("Total Hours per Employee", 14, yPos);
+    doc.text("Total Hours ", 14, yPos);
     yPos += 6;
     doc.autoTable({
       head: [["Employee", "Total Hours"]],
@@ -247,9 +261,13 @@ function exportToPDF() {
     });
 
     doc.save("employee_hours.pdf");
-    exportBtn.textContent = "Export to PDF";
-    exportBtn.disabled = false;
-  }, 500); // Simulate processing time
+  };
+
+  img.onerror = function () {
+    alert(
+      "Error loading logo.png. Please ensure the file is in the same directory and accessible."
+    );
+  };
 }
 
 // // Reset all data
