@@ -192,66 +192,6 @@ function updateTotalSummary() {
   }
 }
 
-// // Export report as PDF
-// function exportToPDF() {
-//   const exportBtn = document.getElementById("exportBtn");
-//   exportBtn.textContent = "Exporting...";
-//   exportBtn.disabled = true;
-
-//   setTimeout(() => {
-//     const { jsPDF } = window.jspdf;
-//     const doc = new jsPDF();
-
-//     // Title
-//     doc.setFontSize(18);
-//     doc.text("Employee Hours Report", 14, 20);
-//     doc.setFontSize(12);
-
-//     // Daily Report Table
-//     const dailyRows = records.map((rec) => [
-//       rec.employeeName,
-//       `${rec.checkInDate} ${rec.checkInTime}`,
-//       `${rec.checkOutDate} ${rec.checkOutTime}`,
-//       rec.formattedDuration,
-//     ]);
-//     doc.text("Daily Report", 14, 30);
-//     doc.autoTable({
-//       head: [["Employee", "Check-In", "Check-Out", "Daily Hours"]],
-//       body: dailyRows,
-//       startY: 35,
-//       theme: "striped",
-//       headStyles: { fillColor: [0, 123, 255] },
-//     });
-
-//     // Total Hours Summary
-//     const totalData = {};
-//     records.forEach((rec) => {
-//       if (!totalData[rec.employeeName]) totalData[rec.employeeName] = 0;
-//       totalData[rec.employeeName] += rec.minutesWorked;
-//     });
-//     const summaryRows = [];
-//     for (const emp in totalData) {
-//       summaryRows.push([emp, formatDuration(totalData[emp])]);
-//     }
-
-//     let yPos = doc.lastAutoTable.finalY + 10;
-//     doc.setFontSize(16);
-//     doc.text("Total Hours per Employee", 14, yPos);
-//     yPos += 6;
-//     doc.autoTable({
-//       head: [["Employee", "Total Hours"]],
-//       body: summaryRows,
-//       startY: yPos,
-//       theme: "striped",
-//       headStyles: { fillColor: [0, 123, 255] },
-//     });
-
-//     doc.save("employee_hours.pdf");
-//     exportBtn.textContent = "Export to PDF";
-//     exportBtn.disabled = false;
-//   }, 500); // Simulate processing time
-// }
-
 function exportToPDF() {
   // Create a new Image object
   const img = new Image();
@@ -288,7 +228,7 @@ function exportToPDF() {
       `${rec.checkOutDate} ${rec.checkOutTime}`,
       rec.formattedDuration,
     ]);
-    doc.text("Daily Report", 14, 50);
+    doc.text("Daily Hours", 14, 50);
     doc.autoTable({
       head: [["Employee", "Check-In", "Check-Out", "Daily Hours"]],
       body: dailyRows,
@@ -310,7 +250,7 @@ function exportToPDF() {
 
     let yPos = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(16);
-    doc.text("Total Hours per Employee", 14, yPos);
+    doc.text("Total Hours ", 14, yPos);
     yPos += 6;
     doc.autoTable({
       head: [["Employee", "Total Hours"]],
@@ -330,19 +270,6 @@ function exportToPDF() {
   };
 }
 
-// // Reset all data
-// function resetData() {
-//   if (
-//     confirm(
-//       "Are you sure you want to reset all data? This action cannot be undone."
-//     )
-//   ) {
-//     records = [];
-//     updateRecordsTable();
-//     updateTotalSummary();
-//     document.getElementById("timeEntryForm").reset();
-//   }
-// }
 
 // New resetData function that shows the custom modal
 function resetData() {
