@@ -270,6 +270,20 @@ function exportToPDF() {
   };
 }
 
+// // Reset all data
+// function resetData() {
+//   if (
+//     confirm(
+//       "Are you sure you want to reset all data? This action cannot be undone."
+//     )
+//   ) {
+//     records = [];
+//     updateRecordsTable();
+//     updateTotalSummary();
+//     document.getElementById("timeEntryForm").reset();
+//   }
+// }
+
 // New resetData function that shows the custom modal
 function resetData() {
   document.getElementById("confirmModal").style.display = "block";
