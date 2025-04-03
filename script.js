@@ -192,19 +192,33 @@ function updateTotalSummary() {
   }
 }
 
-// Export report as PDF
 function exportToPDF() {
-  const exportBtn = document.getElementById("exportBtn");
-  exportBtn.textContent = "Exporting...";
-  exportBtn.disabled = true;
+  // Create a new Image object
+  const img = new Image();
+  img.src = "logo.png"; // Ensure logo.png is in the same directory
 
-  setTimeout(() => {
+  img.onload = function () {
+    // Create a canvas to draw the image and get the Base64 data URL
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    const logoData = canvas.toDataURL("image/png");
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // Title
-    doc.setFontSize(18);
-    doc.text("Employee Hours Report", 14, 20);
+    // Add Company Logo
+    // Adjust x, y, width, and height as needed
+    doc.addImage(logoData, "PNG", 14, 10, 20, 20);
+    // Add Company Name next to the logo
+    doc.setFontSize(20);
+    doc.text("Motel 6,Odessa, TX 79766", 50, 20);
+
+    // Report Title
+    doc.setFontSize(15);
+    doc.text("(432) 272-8702", 50, 28);
     doc.setFontSize(12);
 
     // Daily Report Table: one row per record
@@ -214,7 +228,7 @@ function exportToPDF() {
       `${rec.checkOutDate} ${rec.checkOutTime}`,
       rec.formattedDuration,
     ]);
-    doc.text("Daily Report", 14, 30);
+    doc.text("Daily Hours", 14, 50);
     doc.autoTable({
       head: [["Employee", "Check-In", "Check-Out", "Daily Hours"]],
       body: dailyRows,
@@ -255,20 +269,6 @@ function exportToPDF() {
     );
   };
 }
-
-// // Reset all data
-// function resetData() {
-//   if (
-//     confirm(
-//       "Are you sure you want to reset all data? This action cannot be undone."
-//     )
-//   ) {
-//     records = [];
-//     updateRecordsTable();
-//     updateTotalSummary();
-//     document.getElementById("timeEntryForm").reset();
-//   }
-// }
 
 // New resetData function that shows the custom modal
 function resetData() {
